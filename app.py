@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import Flask, request, render_template_string, jsonify,render_template,send_from_directory
 from  text_to_speech import TextToSpeech
+from db_search.db_search import db_query
 import os
 app = Flask(__name__)
 
@@ -27,4 +28,21 @@ def text_to_speech():
         return jsonify(error_response), 400
 
 
+@app.route("/db-query",methods=['POST'])
+def db_query_mongo():
+    try:
+        data = request.get_json()
+        text = str(data['text'])
+        result = db_query(text)
+        response = {'response':result}
+        return jsonify(response), 200
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        error_response = {
+            'status': 'failure',
+            'message': 'An error occurred while querying service',
+            'error_details': str(e)
+        }
+        return jsonify(error_response), 400
 
